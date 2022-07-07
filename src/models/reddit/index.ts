@@ -1,46 +1,36 @@
 import { createMachine, assign } from 'xstate';
-import { EnumRedditEventName, EventObjects, SelectState, EnumLoadingState, SelectTypeState } from './type';
+import { EnumRedditEventName } from './type';
 
 export * from './event';
 export * from './type';
+export * from './subredditMachine';
 
-function invokeFetchSubreddit(context: {subreddit: string | null}) {
-  const { subreddit } = context;
-
-  return fetch(`https://www.reddit.com/r/${subreddit}.json`)
-    .then((response) => response.json())
-    .then((json) => json.data.children.map((child: any) => child.data));
+type SelectState = {
+  subreddit: string | null
 }
 
-export const redditMachine = createMachine<SelectState, EventObjects>({
+type EventObjects = {
+  type: EnumRedditEventName.SELECT,
+  name: string
+}
+
+type TypeEventObject = {
+  value: 'idle',
+  context: SelectState
+} | {
+  value: 'selected',
+  context: SelectState
+}
+
+export const redditMachine = createMachine<SelectState, EventObjects, TypeEventObject>({
   id: 'reddit',
   initial: 'idle',
   context: {
     subreddit: null,
-    posts: null
   },
   states: {
     idle: {},
-    selected: {
-      initial: EnumLoadingState.LOADING,
-      states: {
-        [EnumLoadingState.LOADING]: {
-          invoke: {
-            id: 'fetch-subreddit',
-            src: invokeFetchSubreddit,
-            onDone: {
-              target: EnumLoadingState.LOADED,
-              actions: assign({
-                posts: (context, event) => event.data
-              })
-            },
-            onError: EnumLoadingState.FAILED
-          }
-        },
-        [EnumLoadingState.LOADED]: {},
-        [EnumLoadingState.FAILED]: {}
-      }
-    }
+    selected: {}
   },
   on: {
     [EnumRedditEventName.SELECT]: {
