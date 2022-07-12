@@ -1,19 +1,14 @@
-const { override, addWebpackAlias, addWebpackPlugin } = require('customize-cra');
-const path = require('path')
+const path = require('path');
+const ArcoWebpackPlugin = require('@arco-plugins/webpack-react');
 
-module.exports = override(
-  addWebpackAlias({
-    "@": path.resolve(__dirname, 'src')
-  }) ,
-  addWebpackPlugin(
-    () =>  [
-      'babel-plugin-import',
-      {
-        libraryName: '@arco-design/web-react',
-        libraryDirectory: 'es',
-        camel2DashComponentName: false,
-        style: 'css', // 样式按需加载
-      },
-    ]
+module.exports = function override(config){
+
+  config.resolve.alias['@'] =  path.resolve(__dirname, 'src')
+  config.plugins.push(
+    new ArcoWebpackPlugin({
+      style: true
+    })
   )
-);
+
+  return config;
+};

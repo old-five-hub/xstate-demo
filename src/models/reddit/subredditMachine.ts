@@ -33,6 +33,7 @@ function invokeFetchSubreddit(context: {subreddit: string | null }) {
 };
 
 export const createSubredditMachine = (subreddit: string) => {
+  console.log('createSubredditMachine', subreddit)
   return createMachine<SelectState, EventObjects, TypeEventObject>({
     id: 'subreddit',
     initial: 'loading',
